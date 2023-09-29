@@ -1,0 +1,189 @@
+---
+title: "hw-02-03"
+format:
+  html:
+    theme: default
+    author: "Kashyap Sai Prasad Nadendla"
+---
+
+## SETUP
+
+```{r message=FALSE, warning=FALSE}
+
+if (!require(pacman))
+  install.packages("pacman")
+
+pacman::p_load(colorblindr,
+       dlookr,
+       formattable,
+       GGally,
+       ggdist,
+       ggpubr,
+       ggridges,
+       here,
+       tidyverse)
+
+# Set global ggplot() theme
+# Theme pub_clean() from the ggpubr package with base text size = 16
+theme_set(theme_pubclean(base_size = 12)) 
+# All axes titles to their respective far right sides
+theme_update(axis.title = element_text(hjust = 1))
+# Remove axes ticks
+theme_update(axis.ticks = element_blank()) 
+# Remove legend key
+theme_update(legend.key = element_blank())
+```
+
+## Load and Examine the dataset
+
+```{r message=FALSE,warning=FALSE}
+
+tuesdata <- tidytuesdayR::tt_load('2023-04-04')
+tuesdata <- tidytuesdayR::tt_load(2023, week = 14)
+```
+
+```{r}
+
+soccer <- tuesdata$soccer
+
+soccer |>
+  head() |>
+  formattable()
+```
+
+## Describe and Visualize Correlations
+
+```{r}
+
+correlate(soccer) |>
+  formattable()
+```
+
+## Correlation Matrix
+
+```{r}
+
+# Correlation matrix of numerical variables
+soccer |>
+plot_correlate()
+```
+
+## Visualize Correlations within Groups
+
+```{r warning=FALSE, message=FALSE}
+
+soccer |>
+  group_by(FTHG) |>
+  plot_correlate()
+```
+
+```{r}
+
+#Using Full time result as the categorical variable
+#ggpairs from GGally pacakge 
+soccer |> 
+  dplyr::select(FTHG, HS, HF) |>
+  ggpairs(aes(color = soccer$FTR, alpha = 0.5)) +
+  theme(strip.background = element_blank()) +
+  scale_fill_discrete() +
+  scale_color_discrete()
+```
+
+## Describe and Visualize Relationships Based on Target Variables
+
+### Numerical Target Variables: Numerical Variable of Interest
+
+```{r}
+
+#Dropping NAs because they give an error
+soccer.noNA <- soccer |> 
+  drop_na()
+
+#Numerical predictor variable we want
+num <- target_by(soccer.noNA, FTHG)
+
+#Relating the variable of interest to the numerical target variable. HST - Home team shots on target
+num_num <- relate(num, HST)
+
+# Summary of the regression analysis - the same as the summary from lm(Formula)
+summary(num_num)
+```
+
+```{r}
+
+# Plotting the linear relationship
+plot(num_num)
+```
+
+### Numerical Target Variables: Categorical Variable of Interest 
+
+```{r}
+
+#The categorical predictor variable that we want
+num <- target_by(soccer, HS) 
+
+num$FTHG <- as.factor(num$FTHG)
+
+#Relating the variable of interest to the numerical target variable
+num_cat <- relate(num, FTHG)
+
+# Summary of the ANOVA analysis - the same as the summary from anova(lm(Formula))
+summary(num_cat)
+```
+
+```{r}
+
+plot(num_cat) + 
+  theme(axis.text.x = element_blank())
+```
+
+```{r warning=FALSE}
+
+# The categorical predictor variable that we want. FTR - Full time result
+categ <- target_by(soccer, FTR)
+
+# Relating the variable of interest to the numerical target variable. FTGH - Full time home goals
+cat_num <- relate(categ, FTHG)
+
+# Summary of descriptive statistics
+summary(cat_num)
+```
+
+```{r}
+
+plot(cat_num)
+```
+
+```{r}
+
+# Creating new categorical column
+cat_dataset <- soccer |>
+  select(FTR, FTHG, HST) |>
+  drop_na() |>
+  mutate(Winner = ifelse(
+    HST > (mean(FTHG + sd(FTHG))), 
+                          "Yes", 
+                          "No"))
+
+# New dataset 
+cat_dataset |>
+  head() |>
+  formattable()
+```
+
+```{r warning=FALSE}
+
+# The categorical predictor variable that we want
+categ <- target_by(cat_dataset, Winner)
+
+# Relating the variable of interest to the categorical target variable
+cat_cat <- relate(categ, FTR)
+
+# Summary of the Chi-square test for Independence
+summary(cat_cat)
+```
+
+```{r}
+
+plot(cat_cat)
+```
