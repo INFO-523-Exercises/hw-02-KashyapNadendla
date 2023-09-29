@@ -1,0 +1,182 @@
+---
+title: "hw-02-01"
+format:
+  html:
+    theme: default
+    author: "Kashyap Sai Prasad Nadendla"
+---
+
+## SETUP
+
+```{r setup, message=FALSE}
+
+# Sets the number of significant figures to two - e.g., 0.01
+options(digits = 2)
+
+# Required package for quick package downloading and loading 
+if (!require(pacman))  
+  install.packages("pacman")
+
+# Downloads and load required packages
+pacman::p_load(dlookr, # Exploratory data analysis
+               forecast, # Needed for Box-Cox transformations
+               formattable, # HTML tables from R outputs
+               here, # Standardizes paths to data
+               kableExtra, # Alternative to formattable
+               knitr, # Needed to write HTML reports
+               missRanger, # To generate NAs
+               tidyverse,
+               tidytuesdayR) # Powerful data wrangling package suite
+```
+
+```{r tornado-dataset, message=FALSE, warning = FALSE}
+
+tuesdata <- tidytuesdayR::tt_load('2023-04-04')
+tuesdata <- tidytuesdayR::tt_load(2023, week = 14)
+```
+
+## Load and Examine the data
+
+```{r view-dataset}
+
+soccer <- tuesdata$soccer
+```
+
+```{r formattable}
+
+soccer |>
+  head() |>
+  formattable()
+```
+
+## Describing Properties of our Data (refined)
+
+```{r}
+
+#Describing the skewness for home/away goals and shots taken for both teams
+
+soccer |>
+  select(FTHG, FTAG, HS, AS) |>
+  describe() |>
+  select(described_variables, skewness) |>
+  formattable()
+```
+
+## Testing Normality (Accelerated)
+
+### Q-Q Plot
+
+```{r qqPlots}
+
+#qqplots
+soccer |>
+plot_normality(FTHG, FTAG, HS, AS)
+```
+
+## Normality within groups
+
+```{r normality-group}
+
+soccer %>%
+  group_by(HS) %>%
+  select(HST) %>%
+  plot_normality()
+```
+
+## Square-root, Cube-root, and Logarithmic Transformations
+
+```{r transforming}
+
+homeGoals <- soccer |>
+  filter(FTHG > 0)
+```
+
+## Square root Transformation
+
+```{r}
+
+sqrtGoals <- transform(homeGoals$FTHG, method = "sqrt") 
+
+summary(sqrtGoals)
+```
+
+```{r sqrt-plot}
+
+sqrtGoals |>
+  plot()
+```
+
+## Logarithmic (+1) Transformation
+
+```{r log+1}
+
+Log1Goals <- transform(homeGoals$FTHG, method = "log+1") 
+
+summary(Log1Goals)
+```
+
+```{r}
+
+Log1Goals |>
+  plot()
+```
+
+## Inverse Transformation
+
+```{r inverseT}
+
+InvGoals <- transform(homeGoals$FTHG, method = "1/x") 
+
+summary(InvGoals)
+```
+
+```{r}
+
+InvGoals |>
+  plot()
+```
+
+## Squared Transformation
+
+```{r squaredTransform}
+
+SqrdGoals <- transform(homeGoals$FTHG, method = "x^2") 
+
+summary(SqrdGoals)
+```
+
+```{r squaredPlot}
+
+SqrdGoals |>
+  plot()
+```
+
+## Cubed Transformation
+
+```{r cubedTransform}
+
+CubeGoals <- transform(homeGoals$FTHG, method = "x^3") 
+
+summary(CubeGoals)
+```
+
+```{r cubePlot}
+
+CubeGoals |>
+  plot()
+```
+
+## Box-Cox Transformation
+
+```{r box-coxTransform}
+
+BoxCoxGoals <- transform(homeGoals$FTHG, method = "Box-Cox") 
+
+summary(BoxCoxGoals)
+```
+
+```{r}
+
+BoxCoxGoals |>
+  plot()
+```
