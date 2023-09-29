@@ -1,0 +1,295 @@
+---
+title: "hw-02-02"
+format:
+  html:
+    theme: default
+    author: "Kashyap Sai Prasad Nadendla"
+---
+
+## SETUP
+
+```{r setup, message=FALSE, warning=FALSE}
+
+# Sets the number of significant figures to two - e.g., 0.01
+options(digits = 2)
+
+# Required package for quick package downloading and loading 
+if (!require(pacman))
+  install.packages("pacman")
+
+pacman::p_load(colorblindr, # Colorblind friendly pallettes
+               cluster, # K cluster analyses
+               dlookr, # Exploratory data analysis
+               formattable, # HTML tables from R outputs
+               ggfortify, # Plotting tools for stats
+               ggpubr, # Publishable ggplots
+               here, # Standardizes paths to data
+               kableExtra, # Alternative to formattable
+               knitr, # Needed to write HTML reports
+               missRanger, # To generate NAs
+               plotly, # Visualization package
+               rattle, # Decision tree visualization
+               rpart, # rpart algorithm
+               tidyverse, # Powerful data wrangling package suite
+               visdat) # Another EDA visualization package
+
+# Set global ggplot() theme
+# Theme pub_clean() from the ggpubr package with base text size = 16
+theme_set(theme_pubclean(base_size = 16)) 
+# All axes titles to their respective far right sides
+theme_update(axis.title = element_text(hjust = 1))
+# Remove axes ticks
+theme_update(axis.ticks = element_blank()) 
+# Remove legend key
+theme_update(legend.key = element_blank())
+```
+
+## Load and Examine dataset
+
+```{r message=FALSE,warning=FALSE}
+
+tuesdata <- tidytuesdayR::tt_load('2023-04-04')
+tuesdata <- tidytuesdayR::tt_load(2023, week = 14)
+```
+
+```{r}
+
+soccer <- tuesdata$soccer
+
+soccer |>
+  head() |>
+  formattable()
+```
+
+## Diagnose your data
+
+```{r}
+
+soccer |>
+  diagnose() |>
+  formattable()
+```
+
+## Diagnose Outliers
+
+```{r}
+
+#Table showing outliers
+soccer |>
+  diagnose_outlier() |>
+  filter(outliers_ratio > 0) |>  
+  mutate(rate = outliers_mean / with_mean) |>
+  arrange(desc(rate)) |> 
+  select(-outliers_cnt) |>
+  formattable()
+```
+
+```{r}
+
+
+#Boxplots and Histograms of data with and without outliers
+soccer |>
+  select(find_outliers(soccer)) |>
+           plot_outlier()
+```
+
+## Basic exploration of Missing Values (NAs)
+
+```{r}
+# Table showing extent of NAs for 30
+# Randomly generate NAs for 30
+na.soccer <- soccer |>
+  generateNA(p = 0.3)
+
+# First six rows
+na.soccer |>
+head() |>
+  formattable()
+```
+
+```{r}
+
+# Creating the NA table
+na.soccer |>
+  plot_na_pareto(only_na = TRUE, plot = FALSE) |>
+  formattable() 
+```
+
+```{r}
+
+#Plots showing frequency of missing values
+#Plotting intersect of the columns with missing values
+na.soccer |>
+  plot_na_pareto(only_na = TRUE)
+```
+
+## Advanced Exploration of Missing Values (NAs)
+
+```{r}
+
+#Intersect plot that shows, for every combination of columns relevant, how many missing values are common
+
+# Plotting the intersect of the 5 columns with the most missing values
+
+na.soccer |>
+  select(FTHG, HS, HF) |>
+  plot_na_intersect(only_na = TRUE)
+```
+
+## Determining if NA Observations are the same
+
+```{r}
+
+# Interactive plotly() plots all NA values to examine every row
+na.soccer |>
+ select(FTHG, HS, HF) |>
+ vis_miss() |>
+ ggplotly()
+```
+
+## Impute Outliers and NAs
+
+### Classifying Outliers
+
+```{r}
+
+soccer %>% 
+  ggplot(aes(x = FTHG, y = HS, fill = HS)) + # Creating a ggplot
+  geom_boxplot(width = 0.5, outlier.size = 2, outlier.alpha = 0.5) +
+  xlab("Full time Home Goals") +
+  ylab("Home Shots") + 
+  scale_fill_binned() + # Changing the color scheme for the fill criteria
+  theme(legend.position = "none")
+```
+
+## Mean Imputation
+
+```{r}
+
+mean_out_fulltime_shots <- soccer |>
+  select(HS) |>
+  filter(HS > 10) |>
+  imputate_outlier(HS, method = "mean")
+
+# Output showing the summary statistics of our imputation
+mean_out_fulltime_shots |>
+  summary()
+```
+
+```{r}
+
+# Visualizing mean imputation
+mean_out_fulltime_shots |>
+  plot()
+```
+
+## Median Imputation
+
+```{r}
+
+med_out_fulltime_shots <- soccer |>
+  select(HS) |>
+  filter(HS > 10) |>
+  imputate_outlier(HS, method = "median")
+
+# Output showing the summary statistics of our imputation
+med_out_fulltime_shots |>
+  summary()
+```
+
+```{r}
+
+#Visualizing median imputation
+med_out_fulltime_shots |>
+  plot()
+```
+
+## Mode Imputation
+
+```{r}
+
+mode_out_fulltime_shots <- soccer |>
+  select(HS) |>
+  filter(HS > 10) |>
+  imputate_outlier(HS, method = "mode")
+
+# Output showing the summary statistics of our imputation
+mode_out_fulltime_shots |>
+  summary()
+```
+
+```{r}
+
+#Visualizing mode imputation
+mode_out_fulltime_shots |>
+  plot()
+```
+
+## Capping Imputation ( aka Winsorizing )
+
+```{r}
+
+cap_out_fulltime_shots <- soccer |>
+  select(HS) |>
+  filter(HS > 10) |>
+  imputate_outlier(HS, method = "capping")
+
+# Output showing the summary statistics of our imputation
+cap_out_fulltime_shots |>
+  summary()
+```
+
+```{r}
+
+#Visualizing capping imputation
+
+cap_out_fulltime_shots |>
+  plot()
+```
+
+## K-Nearest Neighbor (KNN) Imputation
+
+```{r}
+
+#KNN plot of soccer dataset without categories
+autoplot(clara(soccer[-5],3))+
+  scale_x_continuous()
+```
+
+KNN imputation does not work on my dataset.
+
+```{r}
+
+knn_na_fulltime_shots <- na.soccer |>
+  imputate_na(HS,method = "knn")
+
+# KNN does not show any imputation for the chosen dataset
+knn_na_fulltime_shots |>
+  plot()
+```
+
+## Recursive Partitioning and Regression Trees (rpart)
+
+```{r eval=FALSE}
+
+#Error in rpart with Date variable
+
+#rpart_na_fulltime_shots <- na.soccer |>
+  #imputate_na(HS ,method = "rpart")
+```
+
+## Multivariate Imputation by Chained Equations (MICE)
+
+```{r warning=FALSE}
+
+mice_na_fulltime_shots <- na.soccer |>
+  imputate_na(HS, method = "mice", seed = 123)
+```
+
+```{r}
+
+mice_na_fulltime_shots |>
+  plot()
+```
+
+\
