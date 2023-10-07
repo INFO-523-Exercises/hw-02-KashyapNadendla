@@ -26,16 +26,18 @@ pacman::p_load(dlookr, # Exploratory data analysis
                knitr, # Needed to write HTML reports
                missRanger, # To generate NAs
                tidyverse,
-               tidytuesdayR) # Powerful data wrangling package suite
+               tidytuesdayR,showtextdb) # Powerful data wrangling package suite
 ```
 
-```{r tornado-dataset, message=FALSE, warning = FALSE}
+```{r premierLeague-dataset, message=FALSE, warning = FALSE}
 
 tuesdata <- tidytuesdayR::tt_load('2023-04-04')
 tuesdata <- tidytuesdayR::tt_load(2023, week = 14)
 ```
 
 ## Load and Examine the data
+
+I have selected the Premier League match day data. It contains data of every team and their matches in the 2021-2022 season. The data includes teams playing, date, referee, and stats for home and away side such as shots, fouls, cards, halftime and full time result and more.
 
 ```{r view-dataset}
 
@@ -51,10 +53,14 @@ soccer |>
 
 ## Describing Properties of our Data (refined)
 
+Skewness tells us the asymmetry in the dataset. FTHG (Full Time Home Goals) has a skewness of 1.04. This tells us that it is positively right skewed and the value being greater than 1 means the skewness is more pronounced and outliers or extreme values might exist in the high end. This is true since Home teams have a higher chance of scoring more goals than an away team.
+
+Similarly, we can see AS ( Away Shots ) has a skewness of 0.56 which is moderate. It is not extremely skewed like FTHG data.
+
 ```{r}
 
 #Describing the skewness for home/away goals and shots taken for both teams
-
+library(dlookr)
 soccer |>
   select(FTHG, FTAG, HS, AS) |>
   describe() |>
@@ -65,6 +71,10 @@ soccer |>
 ## Testing Normality (Accelerated)
 
 ### Q-Q Plot
+
+Q-Q plot provides us a comparison between observed data and expected values of the theoretical distribution. If the data points follows the straight line, it is approximately distributed as per the theoretical distribution.
+
+If there is a deviation as seen in the Q-Q plot of 'AS' and 'HS' variable, it moves slightly upwards away from the line. This means that the data has higher tails. If there is a significant deviation then it means the data has outliers.
 
 ```{r qqPlots}
 
@@ -78,8 +88,8 @@ plot_normality(FTHG, FTAG, HS, AS)
 ```{r normality-group}
 
 soccer %>%
-  group_by(HS) %>%
-  select(HST) %>%
+  group_by(FTR) %>%
+  select(FTHG,FTAG) %>%
   plot_normality()
 ```
 
@@ -92,6 +102,8 @@ homeGoals <- soccer |>
 ```
 
 ## Square root Transformation
+
+The square root of every data point in the data is taken. This method helps in reducing skewness and adds stability to the variance. We can see that the data after transformation is a lot more linear than the original data.
 
 ```{r}
 
@@ -108,6 +120,8 @@ sqrtGoals |>
 
 ## Logarithmic (+1) Transformation
 
+This method involves taking the log of each data point and adding a value of 1 to each data point.
+
 ```{r log+1}
 
 Log1Goals <- transform(homeGoals$FTHG, method = "log+1") 
@@ -123,12 +137,16 @@ Log1Goals |>
 
 ## Inverse Transformation
 
+In this method, the inverse of each data point is taken. Inverse transformation is less used compared to other methods because it is not suitable for data points that are zero or close to zero and it may not be interpretable.
+
 ```{r inverseT}
 
 InvGoals <- transform(homeGoals$FTHG, method = "1/x") 
 
 summary(InvGoals)
 ```
+
+We can observe there is significant change to the transformed data. The skewness has decreased and so has standard deviation and standard error mean.
 
 ```{r}
 

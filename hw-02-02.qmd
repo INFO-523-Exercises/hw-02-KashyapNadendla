@@ -84,6 +84,8 @@ soccer |>
   formattable()
 ```
 
+We can observe the difference in graphs - with and without outliers to understand that the outliers present do skew the data.
+
 ```{r}
 
 
@@ -115,6 +117,8 @@ na.soccer |>
   formattable() 
 ```
 
+Pareto chart utilizes the 80/20 rule. In the produced pareto chart, every variable is in the Bad ( \<=50%) category in varying levels. This means that none of these variables are of much significance and their impact is relatively distributed.
+
 ```{r}
 
 #Plots showing frequency of missing values
@@ -124,6 +128,8 @@ na.soccer |>
 ```
 
 ## Advanced Exploration of Missing Values (NAs)
+
+This plot shows us if the selected columns contain missing values simultaneously.
 
 ```{r}
 
@@ -138,6 +144,8 @@ na.soccer |>
 
 ## Determining if NA Observations are the same
 
+This is an interactive plot which displays the missing values for the selected columns.
+
 ```{r}
 
 # Interactive plotly() plots all NA values to examine every row
@@ -151,10 +159,14 @@ na.soccer |>
 
 ### Classifying Outliers
 
-```{r}
+The boxplot tells us if the data is skewed and if it contains any outliers. x axis is FTHG (Full Time Home Goals) and y is HS (Home Shots) and grouped by FTR(Full Time Result). Red is for Away team, Green is draw and Blue is Home team.
+
+So there are some outliers where the home team has taken 30 or more shots in a match.
+
+```{r warning=FALSE, message=FALSE}
 
 soccer %>% 
-  ggplot(aes(x = FTHG, y = HS, fill = HS)) + # Creating a ggplot
+  ggplot(aes(x = FTHG, y = HS, color = FTR)) + # Creating a ggplot
   geom_boxplot(width = 0.5, outlier.size = 2, outlier.alpha = 0.5) +
   xlab("Full time Home Goals") +
   ylab("Home Shots") + 
@@ -256,12 +268,13 @@ autoplot(clara(soccer[-5],3))+
   scale_x_continuous()
 ```
 
-KNN imputation does not work on my dataset.
+The output for imputing HS in na.soccer says all values returned NA, not sure why that is as not all values in that dataframe are NAs. Hence, an empty plot is being produced.
 
 ```{r}
 
-knn_na_fulltime_shots <- na.soccer |>
+knn_na_fulltime_shots <- na.soccer %>% 
   imputate_na(HS,method = "knn")
+
 
 # KNN does not show any imputation for the chosen dataset
 knn_na_fulltime_shots |>
@@ -270,12 +283,14 @@ knn_na_fulltime_shots |>
 
 ## Recursive Partitioning and Regression Trees (rpart)
 
+I am getting an error for this method. "factor Date has new levels".
+
 ```{r eval=FALSE}
 
 #Error in rpart with Date variable
 
 #rpart_na_fulltime_shots <- na.soccer |>
-  #imputate_na(HS ,method = "rpart")
+  #imputate_na(AS,method = "rpart")
 ```
 
 ## Multivariate Imputation by Chained Equations (MICE)
