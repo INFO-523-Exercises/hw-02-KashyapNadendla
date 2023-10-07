@@ -95,6 +95,8 @@ soccer %>%
 
 ## Square-root, Cube-root, and Logarithmic Transformations
 
+I have selected FTHG (Full Time Home Goals) as the variable to perform these transformations on. The variable is crucial to understand the outcome of the soccer match.
+
 ```{r transforming}
 
 homeGoals <- soccer |>
@@ -112,7 +114,7 @@ sqrtGoals <- transform(homeGoals$FTHG, method = "sqrt")
 summary(sqrtGoals)
 ```
 
-The transformed data has lower skewness and standard deviation.
+The transformed data has lower skewness and standard deviation. The transformed data has density peak of 1.5 with value ranging from 1.0 - 2.5 whereas the original data's peak is at 0.5 with value ranging between 0-6.
 
 ```{r sqrt-plot}
 
@@ -131,7 +133,7 @@ Log1Goals <- transform(homeGoals$FTHG, method = "log+1")
 summary(Log1Goals)
 ```
 
-The transformed data produces a lower skewness than square root transformation and similar standard deviation.
+The transformed data produces a lower skewness than square root transformation and similar standard deviation. The plotted graph indicates a gradual drop in the original data but with the transformed data there is a sudden drop followed by a rise and then a gradual drop.
 
 ```{r}
 
@@ -141,7 +143,7 @@ Log1Goals |>
 
 ## Inverse Transformation
 
-In this method, the inverse of each data point is taken. Inverse transformation is less used compared to other methods because it is not suitable for data points that are zero or close to zero and it may not be interpretable.
+In this method, the inverse of each data point is taken. Inverse transformation is less used compared to other methods because it is not suitable for data points that are zero or close to zero and it may not be interpretable. It does not work well with the chosen dataset variable as a lot of the values are close to 0 or 1.
 
 ```{r inverseT}
 
@@ -150,7 +152,7 @@ InvGoals <- transform(homeGoals$FTHG, method = "1/x")
 summary(InvGoals)
 ```
 
-We can observe there is significant change to the transformed data. The skewness has decreased and so has standard deviation and standard error mean.
+We can observe there is significant change to the transformed data. The skewness has decreased and so has standard deviation and standard error mean. In this plot, value ranges from 0.25 to 1 and has a density peak above 1.5.
 
 ```{r}
 
@@ -160,7 +162,7 @@ InvGoals |>
 
 ## Squared Transformation
 
-Squared transformation includes
+In squared transformation, each data point is replaced by its square. This is often done to scale the dataset.
 
 ```{r squaredTransform}
 
@@ -168,6 +170,8 @@ SqrdGoals <- transform(homeGoals$FTHG, method = "x^2")
 
 summary(SqrdGoals)
 ```
+
+The transformation produces double the skewness and and an even bigger standard deviation. In the plot with transformed data, value on x ranges from 0 to 50 and density on y is from 0 to 01.25. There is a sudden drop in value in this plot unlike a gradual drop in the original data.
 
 ```{r squaredPlot}
 
@@ -177,12 +181,16 @@ SqrdGoals |>
 
 ## Cubed Transformation
 
+In squared transformation, each data point is replaced by its cube.
+
 ```{r cubedTransform}
 
 CubeGoals <- transform(homeGoals$FTHG, method = "x^3") 
 
 summary(CubeGoals)
 ```
+
+The standard deviation of the transformed data in this case is almost 40 times of the original data. With skewness double of the original data. In the plot of the transformed data, we can see that there is a sharp drop. The range of value is 0 to 300 in, density is from 0 to 0.04.
 
 ```{r cubePlot}
 
@@ -191,6 +199,8 @@ CubeGoals |>
 ```
 
 ## Box-Cox Transformation
+
+This transformation technique is used to reduce variance and make data closely resemble a normal distribution.
 
 ```{r box-coxTransform}
 
