@@ -36,6 +36,8 @@ theme_update(legend.key = element_blank())
 
 ## Load and Examine the dataset
 
+I have selected the Premier League match day data. It contains data of every team and their matches in the 2021-2022 season. The data includes teams playing, date, referee, and stats for home and away side such as shots, fouls, cards, halftime and full time result and more.
+
 ```{r message=FALSE,warning=FALSE}
 
 tuesdata <- tidytuesdayR::tt_load('2023-04-04')
@@ -83,6 +85,8 @@ soccer |>
   plot_correlate()
 ```
 
+ggpairs function results in a matrix of scatter plots and pairwise correlation coefficients for a set of variables in the dataset. We can visualize relationships between variables in multiple forms. The selected variables are - FTHG(Full Time Home Goals), HS(Home Shots) and HF(Home Fouls) and they are differenciated by color FTR(Full Time Result).
+
 ```{r}
 
 #Using Full time result as the categorical variable
@@ -98,6 +102,10 @@ soccer |>
 ## Describe and Visualize Relationships Based on Target Variables
 
 ### Numerical Target Variables: Numerical Variable of Interest
+
+In this method we create a new dataframe and drop the NAs in it. Then, we select FTHG(Full Time Home Goals) as the target variable. Next, the relate function is used to a variable of interest which is HST(Home Shots on Target).
+
+The relate function computes the regression coefficients, standard errors, t-statistics and p-values for the two variables.
 
 ```{r}
 
@@ -115,6 +123,8 @@ num_num <- relate(num, HST)
 summary(num_num)
 ```
 
+A plot with FTHG as x and HST as y and a Predicted vs Observe plot of FTHG.
+
 ```{r}
 
 # Plotting the linear relationship
@@ -123,24 +133,34 @@ plot(num_num)
 
 ### Numerical Target Variables: Categorical Variable of Interest
 
+Here, as target_by and relate was not accepting a character variable, I have created a new column with FTR for Home as 1, Away as 2 and Draw as 0.
+
 ```{r}
 
 #The categorical predictor variable that we want
-num <- target_by(soccer, HS) 
+soccer$resultCategory <- ifelse(soccer$FTR == "H", 1, ifelse(soccer$FTR == "A", 2, 0))
 
-num$FTHG <- as.factor(num$FTHG)
+num <- target_by(soccer, FTHG)
+
+num$resultCategory <- as.factor(num$resultCategory)
 
 #Relating the variable of interest to the numerical target variable
-num_cat <- relate(num, FTHG)
+num_cat <- relate(num, resultCategory)
 
 # Summary of the ANOVA analysis - the same as the summary from anova(lm(Formula))
 summary(num_cat)
 ```
 
+We can infer from the boxplot that value 1 which is Home win contains outliers and is positively skewed.
+
 ```{r}
 
 plot(num_cat) + 
-  theme(axis.text.x = element_blank())
+  theme(axis.text.x = element_blank()) +
+  labs(title = "FTHG's box plot by Full Time Result",
+       x = "Result")
+
+
 ```
 
 ```{r warning=FALSE}
@@ -155,19 +175,23 @@ cat_num <- relate(categ, FTHG)
 summary(cat_num)
 ```
 
+A density plot of FTHG(Full Time Home Goals) with color as FTR(Full Time Result)
+
 ```{r}
 
 plot(cat_num)
 ```
 
+Here, we create a new dataset with a column "Winner" and mutate it with a value based on the mean of HST + standard deviation of HST, if this value is lesser than HST then value is Yes otherwise No.
+
 ```{r}
 
 # Creating new categorical column
 cat_dataset <- soccer |>
-  select(FTR, FTHG, HST) |>
+  select(FTR, FTHG, HST,AST) |>
   drop_na() |>
   mutate(Winner = ifelse(
-    HST > (mean(FTHG + sd(FTHG))), 
+    HST > (mean(HST + sd(HST))), 
                           "Yes", 
                           "No"))
 
@@ -176,6 +200,8 @@ cat_dataset |>
   head() |>
   formattable()
 ```
+
+Here, we calculate the number of cases, factors and then perform chi square test on it. The resulting value is 26 which means there is some dependence between the two variables.
 
 ```{r warning=FALSE}
 
@@ -188,6 +214,8 @@ cat_cat <- relate(categ, FTR)
 # Summary of the Chi-square test for Independence
 summary(cat_cat)
 ```
+
+A mosaic plot with FTR(Full Time Result) as x and Winner as y.
 
 ```{r}
 

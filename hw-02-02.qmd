@@ -46,6 +46,8 @@ theme_update(legend.key = element_blank())
 
 ## Load and Examine dataset
 
+I have selected the Premier League match day data. It contains data of every team and their matches in the 2021-2022 season. The data includes teams playing, date, referee, and stats for home and away side such as shots, fouls, cards, halftime and full time result and more.
+
 ```{r message=FALSE,warning=FALSE}
 
 tuesdata <- tidytuesdayR::tt_load('2023-04-04')
@@ -168,7 +170,7 @@ So there are some outliers where the home team has taken 30 or more shots in a m
 soccer %>% 
   ggplot(aes(x = FTHG, y = HS, color = FTR)) + # Creating a ggplot
   geom_boxplot(width = 0.5, outlier.size = 2, outlier.alpha = 0.5) +
-  xlab("Full time Home Goals") +
+  xlab("Full Time Home Goals") +
   ylab("Home Shots") + 
   scale_fill_binned() + # Changing the color scheme for the fill criteria
   theme(legend.position = "none")

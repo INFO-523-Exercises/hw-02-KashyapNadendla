@@ -112,6 +112,8 @@ sqrtGoals <- transform(homeGoals$FTHG, method = "sqrt")
 summary(sqrtGoals)
 ```
 
+The transformed data has lower skewness and standard deviation.
+
 ```{r sqrt-plot}
 
 sqrtGoals |>
@@ -128,6 +130,8 @@ Log1Goals <- transform(homeGoals$FTHG, method = "log+1")
 
 summary(Log1Goals)
 ```
+
+The transformed data produces a lower skewness than square root transformation and similar standard deviation.
 
 ```{r}
 
@@ -155,6 +159,8 @@ InvGoals |>
 ```
 
 ## Squared Transformation
+
+Squared transformation includes
 
 ```{r squaredTransform}
 
