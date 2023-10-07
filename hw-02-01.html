@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Kashyap Sai Prasad Nadendla">
+
+<title>hw-02-01-Transforming like a Data…Transformer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="hw-02-01_files/libs/clipboard/clipboard.min.js"></script>
+<script src="hw-02-01_files/libs/quarto-html/quarto.js"></script>
+<script src="hw-02-01_files/libs/quarto-html/popper.min.js"></script>
+<script src="hw-02-01_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="hw-02-01_files/libs/quarto-html/anchor.min.js"></script>
+<link href="hw-02-01_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="hw-02-01_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="hw-02-01_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="hw-02-01_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="hw-02-01_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">hw-02-01-Transforming like a Data…Transformer</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kashyap Sai Prasad Nadendla </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">SETUP</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sets the number of significant figures to two - e.g., 0.01</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Required package for quick package downloading and loading </span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(pacman))  </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Downloads and load required packages</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(dlookr, <span class="co"># Exploratory data analysis</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>               forecast, <span class="co"># Needed for Box-Cox transformations</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>               formattable, <span class="co"># HTML tables from R outputs</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>               here, <span class="co"># Standardizes paths to data</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>               kableExtra, <span class="co"># Alternative to formattable</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>               knitr, <span class="co"># Needed to write HTML reports</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>               missRanger, <span class="co"># To generate NAs</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>               tidyverse,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>               tidytuesdayR,showtextdb) <span class="co"># Powerful data wrangling package suite</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tuesdata <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="st">'2023-04-04'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Downloading file 1 of 1: `soccer21-22.csv`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tuesdata <span class="ot">&lt;-</span> tidytuesdayR<span class="sc">::</span><span class="fu">tt_load</span>(<span class="dv">2023</span>, <span class="at">week =</span> <span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Downloading file 1 of 1: `soccer21-22.csv`</code></pre>
+</div>
+</div>
+</section>
+<section id="load-and-examine-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-and-examine-the-data">Load and Examine the data</h2>
+<p>I have selected the Premier League match day data. It contains data of every team and their matches in the 2021-2022 season. The data includes teams playing, date, referee, and stats for home and away side such as shots, fouls, cards, halftime and full time result and more.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>soccer <span class="ot">&lt;-</span> tuesdata<span class="sc">$</span>soccer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>soccer <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formattable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table class="table table-condensed">
+<thead>
+<tr>
+<th style="text-align:right;">
+Date
+</th>
+<th style="text-align:right;">
+HomeTeam
+</th>
+<th style="text-align:right;">
+AwayTeam
+</th>
+<th style="text-align:right;">
+FTHG
+</th>
+<th style="text-align:right;">
+FTAG
+</th>
+<th style="text-align:right;">
+FTR
+</th>
+<th style="text-align:right;">
+HTHG
+</th>
+<th style="text-align:right;">
+HTAG
+</th>
+<th style="text-align:right;">
+HTR
+</th>
+<th style="text-align:right;">
+Referee
+</th>
+<th style="text-align:right;">
+HS
+</th>
+<th style="text-align:right;">
+AS
+</th>
+<th style="text-align:right;">
+HST
+</th>
+<th style="text-align:right;">
+AST
+</th>
+<th style="text-align:right;">
+HF
+</th>
+<th style="text-align:right;">
+AF
+</th>
+<th style="text-align:right;">
+HC
+</th>
+<th style="text-align:right;">
+AC
+</th>
+<th style="text-align:right;">
+HY
+</th>
+<th style="text-align:right;">
+AY
+</th>
+<th style="text-align:right;">
+HR
+</th>
+<th style="text-align:right;">
+AR
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+13/08/2021
+</td>
+<td style="text-align:right;">
+Brentford
+</td>
+<td style="text-align:right;">
+Arsenal
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+M Oliver
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14/08/2021
+</td>
+<td style="text-align:right;">
+Man United
+</td>
+<td style="text-align:right;">
+Leeds
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+P Tierney
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14/08/2021
+</td>
+<td style="text-align:right;">
+Burnley
+</td>
+<td style="text-align:right;">
+Brighton
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+A
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+D Coote
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14/08/2021
+</td>
+<td style="text-align:right;">
+Chelsea
+</td>
+<td style="text-align:right;">
+Crystal Palace
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+J Moss
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14/08/2021
+</td>
+<td style="text-align:right;">
+Everton
+</td>
+<td style="text-align:right;">
+Southampton
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+A
+</td>
+<td style="text-align:right;">
+A Madley
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14/08/2021
+</td>
+<td style="text-align:right;">
+Leicester
+</td>
+<td style="text-align:right;">
+Wolves
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+H
+</td>
+<td style="text-align:right;">
+C Pawson
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+
+</table>
+</div>
+</div>
+</section>
+<section id="describing-properties-of-our-data-refined" class="level2">
+<h2 class="anchored" data-anchor-id="describing-properties-of-our-data-refined">Describing Properties of our Data (refined)</h2>
+<p>Skewness tells us the asymmetry in the dataset. FTHG (Full Time Home Goals) has a skewness of 1.04. This tells us that it is positively right skewed and the value being greater than 1 means the skewness is more pronounced and outliers or extreme values might exist in the high end. This is true since Home teams have a higher chance of scoring more goals than an away team.</p>
+<p>Similarly, we can see AS ( Away Shots ) has a skewness of 0.56 which is moderate. It is not extremely skewed like FTHG data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Describing the skewness for home/away goals and shots taken for both teams</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dlookr)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>soccer <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(FTHG, FTAG, HS, AS) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">describe</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(described_variables, skewness) <span class="sc">|&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">formattable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<table class="table table-condensed">
+<thead>
+<tr>
+<th style="text-align:right;">
+described_variables
+</th>
+<th style="text-align:right;">
+skewness
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+FTHG
+</td>
+<td style="text-align:right;">
+1.04
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+FTAG
+</td>
+<td style="text-align:right;">
+0.97
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+HS
+</td>
+<td style="text-align:right;">
+0.48
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+AS
+</td>
+<td style="text-align:right;">
+0.56
+</td>
+</tr>
+</tbody>
+
+</table>
+</div>
+</div>
+</section>
+<section id="testing-normality-accelerated" class="level2">
+<h2 class="anchored" data-anchor-id="testing-normality-accelerated">Testing Normality (Accelerated)</h2>
+<section id="q-q-plot" class="level3">
+<h3 class="anchored" data-anchor-id="q-q-plot">Q-Q Plot</h3>
+<p>Q-Q plot provides us a comparison between observed data and expected values of the theoretical distribution. If the data points follows the straight line, it is approximately distributed as per the theoretical distribution.</p>
+<p>If there is a deviation as seen in the Q-Q plot of ‘AS’ and ‘HS’ variable, it moves slightly upwards away from the line. This means that the data has higher tails. If there is a significant deviation then it means the data has outliers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#qqplots</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>soccer <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_normality</span>(FTHG, FTAG, HS, AS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/qqPlots-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/qqPlots-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/qqPlots-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/qqPlots-4.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="normality-within-groups" class="level2">
+<h2 class="anchored" data-anchor-id="normality-within-groups">Normality within groups</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>soccer <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(FTR) <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(FTHG,FTAG) <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_normality</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Adding missing grouping variables: `FTR`</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/normality-group-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="square-root-cube-root-and-logarithmic-transformations" class="level2">
+<h2 class="anchored" data-anchor-id="square-root-cube-root-and-logarithmic-transformations">Square-root, Cube-root, and Logarithmic Transformations</h2>
+<p>I have selected FTHG (Full Time Home Goals) as the variable to perform these transformations on. The variable is crucial to understand the outcome of the soccer match.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>homeGoals <span class="ot">&lt;-</span> soccer <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FTHG <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="square-root-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="square-root-transformation">Square root Transformation</h2>
+<p>The square root of every data point in the data is taken. This method helps in reducing skewness and adds stability to the variance. We can see that the data after transformation is a lot more linear than the original data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sqrtGoals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"sqrt"</span>) </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sqrtGoals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with sqrt
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000        287.000
+na          0.000          0.000
+mean        2.003          1.364
+sd          1.160          0.378
+se_mean     0.068          0.022
+IQR         2.000          0.732
+skewness    1.441          0.821
+kurtosis    2.509          0.173
+p00         1.000          1.000
+p01         1.000          1.000
+p05         1.000          1.000
+p10         1.000          1.000
+p20         1.000          1.000
+p25         1.000          1.000
+p30         1.000          1.000
+p40         1.000          1.000
+p50         2.000          1.414
+p60         2.000          1.414
+p70         2.000          1.414
+p75         3.000          1.732
+p80         3.000          1.732
+p90         3.000          1.732
+p95         4.000          2.000
+p99         6.000          2.449
+p100        7.000          2.646</code></pre>
+</div>
+</div>
+<p>The transformed data has lower skewness and standard deviation. The transformed data has density peak of 1.5 with value ranging from 1.0 - 2.5 whereas the original data’s peak is at 0.5 with value ranging between 0-6.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sqrtGoals <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/sqrt-plot-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="logarithmic-1-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="logarithmic-1-transformation">Logarithmic (+1) Transformation</h2>
+<p>This method involves taking the log of each data point and adding a value of 1 to each data point.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Log1Goals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"log+1"</span>) </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Log1Goals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with log+1
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000         287.00
+na          0.000           0.00
+mean        2.003           1.04
+sd          1.160           0.35
+se_mean     0.068           0.02
+IQR         2.000           0.69
+skewness    1.441           0.63
+kurtosis    2.509          -0.41
+p00         1.000           0.69
+p01         1.000           0.69
+p05         1.000           0.69
+p10         1.000           0.69
+p20         1.000           0.69
+p25         1.000           0.69
+p30         1.000           0.69
+p40         1.000           0.69
+p50         2.000           1.10
+p60         2.000           1.10
+p70         2.000           1.10
+p75         3.000           1.39
+p80         3.000           1.39
+p90         3.000           1.39
+p95         4.000           1.61
+p99         6.000           1.95
+p100        7.000           2.08</code></pre>
+</div>
+</div>
+<p>The transformed data produces a lower skewness than square root transformation and similar standard deviation. The plotted graph indicates a gradual drop in the original data but with the transformed data there is a sudden drop followed by a rise and then a gradual drop.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Log1Goals <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="inverse-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="inverse-transformation">Inverse Transformation</h2>
+<p>In this method, the inverse of each data point is taken. Inverse transformation is less used compared to other methods because it is not suitable for data points that are zero or close to zero and it may not be interpretable. It does not work well with the chosen dataset variable as a lot of the values are close to 0 or 1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>InvGoals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"1/x"</span>) </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(InvGoals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with 1/x
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000        287.000
+na          0.000          0.000
+mean        2.003          0.656
+sd          1.160          0.306
+se_mean     0.068          0.018
+IQR         2.000          0.667
+skewness    1.441          0.083
+kurtosis    2.509         -1.694
+p00         1.000          0.143
+p01         1.000          0.167
+p05         1.000          0.250
+p10         1.000          0.333
+p20         1.000          0.333
+p25         1.000          0.333
+p30         1.000          0.500
+p40         1.000          0.500
+p50         2.000          0.500
+p60         2.000          1.000
+p70         2.000          1.000
+p75         3.000          1.000
+p80         3.000          1.000
+p90         3.000          1.000
+p95         4.000          1.000
+p99         6.000          1.000
+p100        7.000          1.000</code></pre>
+</div>
+</div>
+<p>We can observe there is significant change to the transformed data. The skewness has decreased and so has standard deviation and standard error mean. In this plot, value ranges from 0.25 to 1 and has a density peak above 1.5.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>InvGoals <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="squared-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="squared-transformation">Squared Transformation</h2>
+<p>In squared transformation, each data point is replaced by its square. This is often done to scale the dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>SqrdGoals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"x^2"</span>) </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(SqrdGoals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with x^2
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000         287.00
+na          0.000           0.00
+mean        2.003           5.36
+sd          1.160           6.90
+se_mean     0.068           0.41
+IQR         2.000           8.00
+skewness    1.441           3.17
+kurtosis    2.509          13.49
+p00         1.000           1.00
+p01         1.000           1.00
+p05         1.000           1.00
+p10         1.000           1.00
+p20         1.000           1.00
+p25         1.000           1.00
+p30         1.000           1.00
+p40         1.000           1.00
+p50         2.000           4.00
+p60         2.000           4.00
+p70         2.000           4.00
+p75         3.000           9.00
+p80         3.000           9.00
+p90         3.000           9.00
+p95         4.000          16.00
+p99         6.000          36.00
+p100        7.000          49.00</code></pre>
+</div>
+</div>
+<p>The transformation produces double the skewness and and an even bigger standard deviation. In the plot with transformed data, value on x ranges from 0 to 50 and density on y is from 0 to 01.25. There is a sudden drop in value in this plot unlike a gradual drop in the original data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>SqrdGoals <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/squaredPlot-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="cubed-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="cubed-transformation">Cubed Transformation</h2>
+<p>In squared transformation, each data point is replaced by its cube.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>CubeGoals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"x^3"</span>) </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(CubeGoals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with x^3
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000          287.0
+na          0.000            0.0
+mean        2.003           18.3
+sd          1.160           40.1
+se_mean     0.068            2.4
+IQR         2.000           26.0
+skewness    1.441            5.1
+kurtosis    2.509           33.3
+p00         1.000            1.0
+p01         1.000            1.0
+p05         1.000            1.0
+p10         1.000            1.0
+p20         1.000            1.0
+p25         1.000            1.0
+p30         1.000            1.0
+p40         1.000            1.0
+p50         2.000            8.0
+p60         2.000            8.0
+p70         2.000            8.0
+p75         3.000           27.0
+p80         3.000           27.0
+p90         3.000           27.0
+p95         4.000           64.0
+p99         6.000          216.0
+p100        7.000          343.0</code></pre>
+</div>
+</div>
+<p>The standard deviation of the transformed data in this case is almost 40 times of the original data. With skewness double of the original data. In the plot of the transformed data, we can see that there is a sharp drop. The range of value is 0 to 300 in, density is from 0 to 0.04.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>CubeGoals <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/cubePlot-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="box-cox-transformation" class="level2">
+<h2 class="anchored" data-anchor-id="box-cox-transformation">Box-Cox Transformation</h2>
+<p>This transformation technique is used to reduce variance and make data closely resemble a normal distribution.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>BoxCoxGoals <span class="ot">&lt;-</span> <span class="fu">transform</span>(homeGoals<span class="sc">$</span>FTHG, <span class="at">method =</span> <span class="st">"Box-Cox"</span>) </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(BoxCoxGoals)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* Resolving Skewness with Box-Cox
+
+* Information of Transformation (before vs after)
+         Original Transformation
+n         287.000        287.000
+na          0.000          0.000
+mean        2.003          0.432
+sd          1.160          0.397
+se_mean     0.068          0.023
+IQR         2.000          0.853
+skewness    1.441          0.102
+kurtosis    2.509         -1.453
+p00         1.000          0.000
+p01         1.000          0.000
+p05         1.000          0.000
+p10         1.000          0.000
+p20         1.000          0.000
+p25         1.000          0.000
+p30         1.000          0.000
+p40         1.000          0.000
+p50         2.000          0.589
+p60         2.000          0.589
+p70         2.000          0.589
+p75         3.000          0.853
+p80         3.000          0.853
+p90         3.000          0.853
+p95         4.000          1.011
+p99         6.000          1.200
+p100        7.000          1.262</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>BoxCoxGoals <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="hw-02-01_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
